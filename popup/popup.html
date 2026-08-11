@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bili+ 信息流净化器</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="product-header">
+        <div class="brand-mark" aria-hidden="true">B+</div>
+        <div>
+          <p class="eyebrow">BILIBILI CLEANER</p>
+          <h1>Bili+ 信息流净化器</h1>
+          <p class="subtitle">首页净化与视频广告跳过</p>
+        </div>
+        <span class="status-pill" id="purifierStatus" data-state="on">净化已开启</span>
+      </header>
+
+      <section class="summary-card" aria-labelledby="summaryTitle">
+        <div>
+          <p class="section-kicker" id="summaryTitle">本次净化</p>
+          <p class="metric"><b id="statsTotal">0</b><span>项内容已隐藏</span></p>
+        </div>
+        <label class="master-switch">
+          <span>总开关</span>
+          <input class="switch-input" type="checkbox" id="enabled" aria-label="启用信息流净化" />
+          <span class="switch-track" aria-hidden="true"></span>
+        </label>
+      </section>
+
+      <section class="control-section" aria-labelledby="cleanupTitle">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">首页规则</p>
+            <h2 id="cleanupTitle">要净化的内容</h2>
+          </div>
+          <span class="section-note">自动保存</span>
+        </div>
+
+        <div class="rule-list">
+          <label class="rule-row">
+            <span class="rule-copy"><b>顶部轮播</b><small>自动翻页横幅</small></span>
+            <input class="switch-input" type="checkbox" id="removeCarousel" aria-label="移除顶部轮播大图" />
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+          <label class="rule-row">
+            <span class="rule-copy"><b>广告卡片</b><small>推广卡与外链广告</small></span>
+            <input class="switch-input" type="checkbox" id="removeAds" aria-label="移除广告卡片" />
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+          <label class="rule-row">
+            <span class="rule-copy"><b>直播与番剧</b><small>直播、番剧及其他内容类型</small></span>
+            <input class="switch-input" type="checkbox" id="removeContentTypes" aria-label="移除直播和番剧等类型卡片" />
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+          <label class="rule-row">
+            <span class="rule-copy"><b>恰饭与暗广</b><small>按关键词识别</small></span>
+            <input class="switch-input" type="checkbox" id="removeSponsor" aria-label="移除恰饭和暗广内容" />
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+          <label class="rule-row">
+            <span class="rule-copy"><b>黑名单 UP 主</b><small>按 UID 过滤</small></span>
+            <input class="switch-input" type="checkbox" id="removeBlacklist" aria-label="移除黑名单 UP 主内容" />
+            <span class="switch-track" aria-hidden="true"></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="stats-card" aria-label="净化分类统计">
+        <span>广告 <b id="stAds">0</b></span>
+        <span>轮播 <b id="stCarousel">0</b></span>
+        <span>恰饭 <b id="stSponsor">0</b></span>
+        <span>类型 <b id="stContentType">0</b></span>
+        <span>黑名单 <b id="stBlacklist">0</b></span>
+      </section>
+
+      <section class="advanced-section" aria-label="高级规则">
+        <details class="editor" open>
+          <summary><span>恰饭 / 暗广关键词</span><small>自定义规则</small></summary>
+          <p class="hint">标题、UP 主名或角标命中任一关键词即移除。支持逗号、顿号或换行分隔。</p>
+          <textarea id="sponsorKeywords" rows="5" spellcheck="false" aria-label="恰饭和暗广关键词"></textarea>
+        </details>
+        <details class="editor">
+          <summary><span>UP 主 UID 黑名单</span><small>按创作者过滤</small></summary>
+          <p class="hint">每行一个 UID（空间地址 space.bilibili.com/ 后面的数字）。</p>
+          <textarea id="blacklistUids" rows="4" spellcheck="false" aria-label="UP 主 UID 黑名单"></textarea>
+        </details>
+      </section>
+
+      <section class="action-section" aria-label="扩展操作">
+        <button id="purgeNow" type="button" class="button button-primary">立即净化当前页</button>
+        <div class="secondary-actions">
+          <button id="resetStats" type="button" class="button button-secondary">重置统计</button>
+          <button id="openSponsorSettings" type="button" class="button button-secondary">视频广告跳过设置</button>
+        </div>
+      </section>
+
+      <section class="capture-card" aria-labelledby="captureTitle">
+        <div class="capture-heading">
+          <div>
+            <p class="section-kicker">按需诊断</p>
+            <h2 id="captureTitle">页面抓取会话</h2>
+          </div>
+          <span class="capture-state" id="captureState" data-state="idle">未开始</span>
+        </div>
+        <p class="capture-description">只在会话期间记录页面变更摘要；结束后下载报告，平时不会持续记录。</p>
+        <div class="capture-actions">
+          <button id="startCapture" type="button" class="button button-capture-start">开始抓取</button>
+          <button id="stopCapture" type="button" class="button button-capture-stop" disabled>结束并导出</button>
+        </div>
+        <p class="capture-duration" id="captureDuration" aria-live="polite"></p>
+      </section>
+
+      <p class="notice" id="captureHint" role="status" aria-live="polite" hidden></p>
+      <p class="footer-note">设置会自动保存；刷新页面可恢复已隐藏内容。</p>
+    </main>
+
+    <script src="../config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

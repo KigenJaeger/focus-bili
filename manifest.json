@@ -1,0 +1,73 @@
+{
+  "manifest_version": 3,
+  "name": "Bili+ 信息流净化器",
+  "version": "1.0.0",
+  "default_locale": "zh_CN",
+  "description": "净化哔哩哔哩信息流：移除自动翻页轮播大图广告、广告卡片、恰饭/暗广视频与黑名单 UP 主内容。",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://*.bilibili.com/*",
+    "https://*.bsbsb.top/*",
+    "http://*.bsbsb.top/*"
+  ],
+  "optional_permissions": ["webNavigation"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.bilibili.com/",
+        "https://www.bilibili.com/index.html"
+      ],
+      "js": ["config.js", "content.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://www.bilibili.com/video/*",
+        "https://www.bilibili.com/bangumi/play/*",
+        "https://www.bilibili.com/cheese/play/*"
+      ],
+      "js": ["js/sponsorblock-safety.js", "js/content.js"],
+      "css": ["content.css", "shared.css"],
+      "run_at": "document_idle",
+      "world": "ISOLATED"
+    },
+    {
+      "matches": [
+        "https://www.bilibili.com/video/*",
+        "https://www.bilibili.com/bangumi/play/*",
+        "https://www.bilibili.com/cheese/play/*"
+      ],
+      "js": ["js/document.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    }
+  ],
+  "background": {
+    "service_worker": "js/background-wrapper.js"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "js/document.js", "content.css", "shared.css"],
+      "matches": ["https://www.bilibili.com/*"]
+    }
+  ],
+  "action": {
+    "default_title": "Bili+ 信息流净化器",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
