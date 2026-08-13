@@ -104,7 +104,10 @@
     if (settings.enabled !== false) {
       // B 站会给右侧「刷新内容」控件加 hidden 类；它仍在 DOM 中却不可见。
       // 仅恢复这个控件的可见性，避免把其他站点控件一并强制显示。
-      rules.push('.flexible-roll-btn.hidden, .flexible-roll-btn.hidden .flexible-roll-btn-inner { visibility: visible !important; }')
+      rules.push(
+        '.flexible-roll-btn, .feed-roll-btn { pointer-events: auto !important; position: relative; z-index: 2; }',
+        '.flexible-roll-btn.hidden, .flexible-roll-btn.hidden .flexible-roll-btn-inner { visibility: visible !important; pointer-events: auto !important; }'
+      )
     }
     if (settings.enabled !== false && settings.removeCarousel) {
       // B 站给轮播用过 recommended-swipe / recommended-swipe-body-normal 等变体，统一按前缀匹配

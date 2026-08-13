@@ -3,6 +3,11 @@
     const reason = event.reason
     const message = String(reason?.message || reason || '')
     const stack = String(reason?.stack || '')
+    if (/bpx-player-progress-schedule/.test(message)) {
+      event.preventDefault()
+      return
+    }
+
     if (/appendChild/.test(message) && /setupThumbnailListener|content\.js/.test(stack)) {
       event.preventDefault()
     }

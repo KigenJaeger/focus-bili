@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Bili+ 信息流净化器",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "default_locale": "zh_CN",
   "description": "净化哔哩哔哩信息流：移除自动翻页轮播大图广告、广告卡片、恰饭/暗广视频与黑名单 UP 主内容。",
   "permissions": ["storage", "scripting", "activeTab"],
