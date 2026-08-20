@@ -2,8 +2,14 @@
 'use strict'
 
 ;(function () {
-  // 首页可能是 /、/index.html，也可能带尾随斜杠；其余页面一律不介入
-  if (!/^\/(index\.html?)?$/.test(location.pathname)) return
+  // 首页 pathname 可能是 / 或 /index.html，query 参数（如 ?back=...）不影响判断。
+  // 其余 B 站页面也会加载本脚本，但只保留抓取会话能力，不执行信息流净化。
+  // B 站是 SPA，视频页切回首页时 pathname 会变化，因此需要动态切换模式。
+  let captureOnly = !isHomePath(location.pathname)
+
+  function isHomePath(pathname) {
+    return /^\/(?:index\.html?)?$/.test(pathname)
+  }
 
   const CAROUSEL_SELECTOR = '.recommended-swipe, [class^="recommended-swipe"]'
   // 首页存在两套卡片结构：常规视频流用 feed-card / bili-video-card，
@@ -50,10 +56,13 @@
   let capture = createCaptureState()
   const MAX_CAPTURE_EVENTS = 240
 
-  const styleEl = document.createElement('style')
-  styleEl.id = 'bili-purifier-style'
-  ;(document.head || document.documentElement).appendChild(styleEl)
-  syncStyle()
+  let styleEl = null
+  if (!captureOnly) {
+    styleEl = document.createElement('style')
+    styleEl.id = 'bili-purifier-style'
+    ;(document.head || document.documentElement).appendChild(styleEl)
+    syncStyle()
+  }
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!message || message.type !== 'biliPurifierCapture') return false
@@ -71,28 +80,52 @@
 
     return false
   })
-
   chrome.storage.local.get(['settings', 'captureSession'], (res) => {
     if (res && res.settings) settings = Object.assign({}, DEFAULT_SETTINGS, res.settings)
     if (res && res.captureSession && res.captureSession.active) {
       beginCapture(res.captureSession.startedAt, true)
     }
-    syncStyle()
+    if (!captureOnly) syncStyle()
     whenReady(() => {
-      purge()
-      startObserver()
+      if (captureOnly) {
+        startObserver()
+      } else {
+        purge()
+        startObserver()
+      }
     })
   })
+
+  function handleNavigation() {
+    const nowHome = isHomePath(location.pathname)
+    if (nowHome === !captureOnly) return
+
+    captureOnly = !nowHome
+    if (nowHome) {
+      if (!styleEl) {
+        styleEl = document.createElement('style')
+        styleEl.id = 'bili-purifier-style'
+        ;(document.head || document.documentElement).appendChild(styleEl)
+      }
+      syncStyle()
+      purge()
+    }
+  }
 
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return
     if (changes.settings) {
       settings = Object.assign({}, DEFAULT_SETTINGS, changes.settings.newValue)
-      syncStyle()
-      purge()
+      if (!captureOnly) {
+        syncStyle()
+        purge()
+      }
     }
-    if (changes.purgeNow) purge()
+    if (changes.purgeNow && !captureOnly) purge()
   })
+
+  window.addEventListener('popstate', handleNavigation)
+  window.addEventListener('hashchange', handleNavigation)
 
   function whenReady(fn) {
     if (document.body) fn()
@@ -131,6 +164,8 @@
     if (observer) return
     observer = new MutationObserver((mutations) => {
       recordCaptureEvent(mutations)
+      handleNavigation()
+      if (captureOnly) return
       clearTimeout(purgeTimer)
       purgeTimer = setTimeout(purge, 120)
     })

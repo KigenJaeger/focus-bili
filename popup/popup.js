@@ -141,7 +141,7 @@ function sendCaptureMessage(action) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) return reject(chrome.runtime.lastError)
       const tab = tabs && tabs[0]
-      if (!tab || !isBilibiliPage(tab.url)) return reject(new Error('请先切到 B 站首页'))
+      if (!tab || !isBilibiliPage(tab.url)) return reject(new Error('请先切到 B 站页面'))
       chrome.tabs.sendMessage(tab.id, { type: 'biliPurifierCapture', action }, (response) => {
         if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
         else resolve(response)
@@ -156,7 +156,7 @@ async function startCapture() {
   hint('正在连接当前页面…')
   try {
     const response = await sendCaptureMessage('start')
-    if (!response || !response.ok) throw new Error('页面未响应，请刷新 B 站首页后重试')
+    if (!response || !response.ok) throw new Error('页面未响应，请刷新当前 B 站页面后重试')
     renderCaptureState({ active: true, startedAt: response.startedAt })
     hint('已开始抓取；问题复现后点击“结束并导出”')
   } catch (error) {
